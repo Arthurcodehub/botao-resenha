@@ -4,37 +4,141 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Botão da Resenha</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 16px; }
+    button { font-size: 1rem; padding: 10px 14px; margin: 4px 4px 4px 0; }
+    #chamar { width: 100%; padding: 24px; font-size: 1.3rem; font-weight: bold; }
+    .card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin: 12px 0; }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
-  <form id="form-login">
-    <input type="email" id="email" placeholder="Email" required>
-    <button type="submit">Enviar Link Mágico</button>
-  </form>
-  <p id="mensagem"></p>
+  <section id="tela-login">
+    <form id="form-login">
+      <input type="email" id="email" placeholder="Email" required>
+      <button type="submit">Enviar Link Mágico</button>
+    </form>
+    <p id="mensagem-login"></p>
+  </section>
+
+  <section id="tela-principal" class="hidden">
+    <button id="chamar">CHAMAR RESENHA</button>
+    <button id="sair">Sair</button>
+    <p id="mensagem"></p>
+    <div id="lista"></div>
+  </section>
 
   <script type="module">
-    import { enviarLinkMagico, quandoMudarLogin } from '../src/js/auth.js';
+    import { enviarLinkMagico, sair, quandoMudarLogin } from '../src/js/auth.js';
+    import { criarResenha, responderResenha, listarResenhas } from '../src/js/resenhas.js';
 
-    const form = document.getElementById('form-login');
+    const telaLogin = document.getElementById('tela-login');
+    const telaPrincipal = document.getElementById('tela-principal');
+    const formLogin = document.getElementById('form-login');
     const email = document.getElementById('email');
-    const mensagem = document.getElementById('mensagem');
+    const msgLogin = document.getElementById('mensagem-login');
+    const msg = document.getElementById('mensagem');
+    const lista = document.getElementById('lista');
+    const botaoChamar = document.getElementById('chamar');
+    const botaoSair = document.getElementById('sair');
 
-    form.addEventListener('submit', async (evento) => {
+    const TEXTO_RESPOSTA = {
+      aceito: '🍻 Aceitou',
+      recusado: '❌ Recusou',
+      outro_horario: '🕒 Sugeriu outro horário',
+    };
+
+    formLogin.addEventListener('submit', async (evento) => {
       evento.preventDefault(); // impede o recarregamento da página
-      mensagem.textContent = 'Enviando...';
-
+      msgLogin.textContent = 'Enviando...';
       try {
         await enviarLinkMagico(email.value.trim());
-        mensagem.textContent = 'Link enviado. Confira seu e-mail.';
+        msgLogin.textContent = 'Link enviado. Confira seu e-mail.';
       } catch (erro) {
         console.error(erro);
-        mensagem.textContent = 'Não foi possível enviar. Veja o console.';
+        msgLogin.textContent = 'Não foi possível enviar. Esse e-mail foi convidado?';
       }
     });
 
-    // Roda quando o login muda: ao abrir a página, ao sair ou ao voltar do link
-    quandoMudarLogin((usuario) => {
-      console.log('usuario:', usuario);
+    botaoSair.addEventListener('click', () => sair());
+
+    botaoChamar.addEventListener('click', async () => {
+      botaoChamar.disabled = true;
+      try {
+        await criarResenha();
+        msg.textContent = 'Resenha chamada!';
+        await atualizarLista();
+      } catch (erro) {
+        console.error(erro);
+        msg.textContent = 'Não foi possível chamar a resenha.';
+      } finally {
+        botaoChamar.disabled = false;
+      }
+    });
+
+    async function atualizarLista() {
+      try {
+        const resenhas = await listarResenhas();
+        lista.replaceChildren(...resenhas.map(desenharResenha));
+      } catch (erro) {
+        console.error(erro);
+        msg.textContent = 'Não foi possível carregar as resenhas.';
+      }
+    }
+
+    function desenharResenha(resenha) {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const titulo = document.createElement('strong');
+      titulo.textContent = `${resenha.perfis?.nome ?? 'Alguém'} chamou a resenha`;
+      card.append(titulo);
+
+      const respostas = document.createElement('ul');
+      for (const r of resenha.respostas) {
+        const item = document.createElement('li');
+        const texto = TEXTO_RESPOSTA[r.resposta] ?? r.resposta;
+        const horario = r.horario_sugerido ? ` (${r.horario_sugerido})` : '';
+        item.textContent = `${r.perfis?.nome ?? 'Membro'}: ${texto}${horario}`;
+        respostas.append(item);
+      }
+      card.append(respostas);
+
+      for (const [valor, rotulo] of Object.entries(TEXTO_RESPOSTA)) {
+        const botao = document.createElement('button');
+        botao.textContent = rotulo;
+        botao.addEventListener('click', () => responder(resenha.id, valor));
+        card.append(botao);
+      }
+
+      return card;
+    }
+
+    async function responder(resenhaId, valor) {
+      let horario = null;
+      if (valor === 'outro_horario') {
+        horario = prompt('Qual horário você sugere?');
+        if (!horario) return; // cancelou
+      }
+      try {
+        await responderResenha(resenhaId, valor, horario);
+        await atualizarLista();
+      } catch (erro) {
+        console.error(erro);
+        msg.textContent = 'Não foi possível registrar sua resposta.';
+      }
+    }
+
+    // Mostra a tela certa sempre que o login muda (abrir a página, entrar, sair)
+    quandoMudarLogin(async (usuario) => {
+      if (usuario) {
+        telaLogin.classList.add('hidden');
+        telaPrincipal.classList.remove('hidden');
+        await atualizarLista();
+      } else {
+        telaPrincipal.classList.add('hidden');
+        telaLogin.classList.remove('hidden');
+      }
     });
   </script>
 </body>
