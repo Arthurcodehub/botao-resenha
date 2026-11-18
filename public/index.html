@@ -38,6 +38,14 @@
     const botaoChamar = document.getElementById('chamar');
     const botaoSair = document.getElementById('sair');
 
+    // Textos dos botões: ação que o membro vai escolher
+    const BOTOES_RESPOSTA = [
+      { valor: 'aceito', rotulo: '🍻 Aceitar resenha' },
+      { valor: 'recusado', rotulo: '❌ Recusar resenha' },
+      { valor: 'outro_horario', rotulo: '🕒 Definir outro horário' },
+    ];
+
+    // Textos da lista: o que cada membro já fez
     const TEXTO_RESPOSTA = {
       aceito: '🍻 Aceitou',
       recusado: '❌ Recusou',
@@ -98,7 +106,7 @@
       }
       card.append(respostas);
 
-      for (const [valor, rotulo] of Object.entries(TEXTO_RESPOSTA)) {
+      for (const { valor, rotulo } of BOTOES_RESPOSTA) {
         const botao = document.createElement('button');
         botao.textContent = rotulo;
         botao.addEventListener('click', () => responder(resenha.id, valor));
