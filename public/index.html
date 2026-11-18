@@ -4,13 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Botão da Resenha</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 16px; }
-    button { font-size: 1rem; padding: 10px 14px; margin: 4px 4px 4px 0; }
-    #chamar { width: 100%; padding: 24px; font-size: 1.3rem; font-weight: bold; }
-    .card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin: 12px 0; }
-    .hidden { display: none; }
-  </style>
+  <link rel="stylesheet" href="../src/css/style.css">
 </head>
 <body>
   <section id="tela-login">
@@ -25,123 +19,6 @@
     <div id="lista"></div>
   </section>
 
-  <script type="module">
-    import { entrarComGoogle, sair, quandoMudarLogin } from '../src/js/auth.js';
-    import { criarResenha, responderResenha, listarResenhas } from '../src/js/resenhas.js';
-
-    const telaLogin = document.getElementById('tela-login');
-    const telaPrincipal = document.getElementById('tela-principal');
-    const botaoGoogle = document.getElementById('entrar-google');
-    const msgLogin = document.getElementById('mensagem-login');
-    const msg = document.getElementById('mensagem');
-    const lista = document.getElementById('lista');
-    const botaoChamar = document.getElementById('chamar');
-    const botaoSair = document.getElementById('sair');
-
-    // Textos dos botões: ação que o membro vai escolher
-    const BOTOES_RESPOSTA = [
-      { valor: 'aceito', rotulo: '🍻 Aceitar resenha' },
-      { valor: 'recusado', rotulo: '❌ Recusar resenha' },
-      { valor: 'outro_horario', rotulo: '🕒 Definir outro horário' },
-    ];
-
-    // Textos da lista: o que cada membro já fez
-    const TEXTO_RESPOSTA = {
-      aceito: '🍻 Aceitou',
-      recusado: '❌ Recusou',
-      outro_horario: '🕒 Sugeriu outro horário',
-    };
-
-    botaoGoogle.addEventListener('click', async () => {
-      msgLogin.textContent = 'Abrindo o Google...';
-      try {
-        await entrarComGoogle();
-      } catch (erro) {
-        console.error(erro);
-        msgLogin.textContent = `Não foi possível entrar: ${erro.message}`;
-      }
-    });
-
-    botaoSair.addEventListener('click', () => sair());
-
-    botaoChamar.addEventListener('click', async () => {
-      botaoChamar.disabled = true;
-      try {
-        await criarResenha();
-        msg.textContent = 'Resenha chamada!';
-        await atualizarLista();
-      } catch (erro) {
-        console.error(erro);
-        msg.textContent = 'Não foi possível chamar a resenha.';
-      } finally {
-        botaoChamar.disabled = false;
-      }
-    });
-
-    async function atualizarLista() {
-      try {
-        const resenhas = await listarResenhas();
-        lista.replaceChildren(...resenhas.map(desenharResenha));
-      } catch (erro) {
-        console.error(erro);
-        msg.textContent = 'Não foi possível carregar as resenhas.';
-      }
-    }
-
-    function desenharResenha(resenha) {
-      const card = document.createElement('div');
-      card.className = 'card';
-
-      const titulo = document.createElement('strong');
-      titulo.textContent = `${resenha.perfis?.nome ?? 'Alguém'} chamou a resenha`;
-      card.append(titulo);
-
-      const respostas = document.createElement('ul');
-      for (const r of resenha.respostas) {
-        const item = document.createElement('li');
-        const texto = TEXTO_RESPOSTA[r.resposta] ?? r.resposta;
-        const horario = r.horario_sugerido ? ` (${r.horario_sugerido})` : '';
-        item.textContent = `${r.perfis?.nome ?? 'Membro'}: ${texto}${horario}`;
-        respostas.append(item);
-      }
-      card.append(respostas);
-
-      for (const { valor, rotulo } of BOTOES_RESPOSTA) {
-        const botao = document.createElement('button');
-        botao.textContent = rotulo;
-        botao.addEventListener('click', () => responder(resenha.id, valor));
-        card.append(botao);
-      }
-
-      return card;
-    }
-
-    async function responder(resenhaId, valor) {
-      let horario = null;
-      if (valor === 'outro_horario') {
-        horario = prompt('Qual horário você sugere?');
-        if (!horario) return; // cancelou
-      }
-      try {
-        await responderResenha(resenhaId, valor, horario);
-        await atualizarLista();
-      } catch (erro) {
-        console.error(erro);
-        msg.textContent = 'Não foi possível registrar sua resposta.';
-      }
-    }
-
-    // Mostra a tela certa sempre que o login muda (abrir a página, entrar, sair)
-    quandoMudarLogin(async (usuario) => {
-      if (usuario) {
-        telaLogin.classList.add('hidden');
-        telaPrincipal.classList.remove('hidden');
-        await atualizarLista();
-      } else {
-        telaPrincipal.classList.add('hidden');
-        telaLogin.classList.remove('hidden');
-      }
-    });
-  </script>
+  <script type="module" src="../src/js/app.js"></script>
 </body>
 </html>

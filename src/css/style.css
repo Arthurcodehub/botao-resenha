@@ -1,0 +1,30 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+button {
+  font-size: 1rem;
+  padding: 10px 14px;
+  margin: 4px 4px 4px 0;
+}
+
+#chamar {
+  width: 100%;
+  padding: 24px;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.hidden {
+  display: none;
+}
