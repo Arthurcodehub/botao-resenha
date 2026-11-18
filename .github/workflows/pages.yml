@@ -20,9 +20,7 @@ jobs:
           mkdir _site
           cp -r public/. _site/
           cp -r src _site/src
-          # No site publicado, src/ fica ao lado do index.html, então o caminho muda de ../src/ para ./src/
           sed -i 's#\.\./src/#./src/#g' _site/index.html
-          # Garante que a troca aconteceu; se não, o site publica com import quebrado
           grep -q './src/js/auth.js' _site/index.html
 
       - uses: actions/upload-pages-artifact@v3
