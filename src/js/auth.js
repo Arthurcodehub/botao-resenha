@@ -1,4 +1,4 @@
-]// src/js/auth.js
+// src/js/auth.js
 // Cuida de entrar e sair. Nenhuma outra parte do app mexe em login diretamente.
 
 import { supabase } from './supabase.js';
@@ -9,18 +9,6 @@ export async function entrarComGoogle() {
     provider: 'google',
     options: {
       redirectTo: window.location.origin + window.location.pathname,
-    },
-  });
-
-  if (error) throw error;
-}
-
-// Login por link mágico (mantido como alternativa)
-export async function enviarLinkMagico(email) {
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: window.location.origin + window.location.pathname,
     },
   });
 
