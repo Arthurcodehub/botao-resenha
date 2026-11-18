@@ -14,10 +14,7 @@
 </head>
 <body>
   <section id="tela-login">
-    <form id="form-login">
-      <input type="email" id="email" placeholder="Email" required>
-      <button type="submit">Enviar Link Mágico</button>
-    </form>
+    <button id="entrar-google">Entrar com Google</button>
     <p id="mensagem-login"></p>
   </section>
 
@@ -29,13 +26,12 @@
   </section>
 
   <script type="module">
-    import { enviarLinkMagico, sair, quandoMudarLogin } from '../src/js/auth.js';
+    import { entrarComGoogle, sair, quandoMudarLogin } from '../src/js/auth.js';
     import { criarResenha, responderResenha, listarResenhas } from '../src/js/resenhas.js';
 
     const telaLogin = document.getElementById('tela-login');
     const telaPrincipal = document.getElementById('tela-principal');
-    const formLogin = document.getElementById('form-login');
-    const email = document.getElementById('email');
+    const botaoGoogle = document.getElementById('entrar-google');
     const msgLogin = document.getElementById('mensagem-login');
     const msg = document.getElementById('mensagem');
     const lista = document.getElementById('lista');
@@ -48,15 +44,13 @@
       outro_horario: '🕒 Sugeriu outro horário',
     };
 
-    formLogin.addEventListener('submit', async (evento) => {
-      evento.preventDefault(); // impede o recarregamento da página
-      msgLogin.textContent = 'Enviando...';
+    botaoGoogle.addEventListener('click', async () => {
+      msgLogin.textContent = 'Abrindo o Google...';
       try {
-        await enviarLinkMagico(email.value.trim());
-        msgLogin.textContent = 'Link enviado. Confira seu e-mail.';
+        await entrarComGoogle();
       } catch (erro) {
         console.error(erro);
-        msgLogin.textContent = 'Não foi possível enviar. Esse e-mail foi convidado?';
+        msgLogin.textContent = `Não foi possível entrar: ${erro.message}`;
       }
     });
 
