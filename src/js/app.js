@@ -3,6 +3,7 @@
 
 import { entrarComGoogle, sair, quandoMudarLogin } from './auth.js';
 import { criarResenha, responderResenha, listarResenhas } from './resenhas.js';
+import { ouvirMudancas, pararDeOuvir } from './realtime.js';
 
 const telaLogin = document.getElementById('tela-login');
 const telaPrincipal = document.getElementById('tela-principal');
@@ -44,7 +45,6 @@ botaoChamar.addEventListener('click', async () => {
   try {
     await criarResenha();
     msg.textContent = 'Resenha chamada!';
-    await atualizarLista();
   } catch (erro) {
     console.error(erro);
     msg.textContent = 'Não foi possível chamar a resenha.';
@@ -99,20 +99,22 @@ async function responder(resenhaId, valor) {
   }
   try {
     await responderResenha(resenhaId, valor, horario);
-    await atualizarLista();
   } catch (erro) {
     console.error(erro);
     msg.textContent = 'Não foi possível registrar sua resposta.';
   }
 }
 
-// Mostra a tela certa sempre que o login muda (abrir a página, entrar, sair)
+// Mostra a tela certa e liga ou desliga a escuta ao vivo conforme o login
 quandoMudarLogin(async (usuario) => {
   if (usuario) {
     telaLogin.classList.add('hidden');
     telaPrincipal.classList.remove('hidden');
     await atualizarLista();
+    // Qualquer mudança no banco refaz a lista, sem precisar do payload
+    ouvirMudancas(atualizarLista);
   } else {
+    pararDeOuvir();
     telaPrincipal.classList.add('hidden');
     telaLogin.classList.remove('hidden');
   }
