@@ -1,30 +1,217 @@
+/* ===== Variáveis ===== */
+:root {
+  --preto: #000;
+  --grafite: #111;
+  --cinza-escuro: #1c1c1c;
+  --cinza-borda: #2e2e2e;
+  --cinza-texto: #9a9a9a;
+  --branco: #fff;
+  --raio: 16px;
+  --fonte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ===== Reset ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  font-family: system-ui, sans-serif;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
-button {
-  font-size: 1rem;
-  padding: 10px 14px;
-  margin: 4px 4px 4px 0;
-}
-
-#chamar {
-  width: 100%;
-  padding: 24px;
-  font-size: 1.3rem;
-  font-weight: bold;
-}
-
-.card {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 12px;
-  margin: 12px 0;
+  min-height: 100dvh;
+  background: var(--preto);
+  color: var(--branco);
+  font-family: var(--fonte);
+  line-height: 1.5;
+  display: flex;
+  justify-content: center;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
+}
+
+/* ===== Telas ===== */
+section {
+  width: 100%;
+  max-width: 420px;
+  min-height: 100dvh;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: entrar 0.4s ease both;
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Tela de login ===== */
+#tela-login {
+  justify-content: center;
+  text-align: center;
+}
+
+.logo {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 8px;
+}
+
+.titulo {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.apresentacao {
+  color: var(--cinza-texto);
+  margin-bottom: 24px;
+}
+
+/* ===== Botões ===== */
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 2px solid var(--branco);
+  border-radius: var(--raio);
+  transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+button:focus-visible {
+  outline: 3px solid var(--cinza-texto);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Botão principal (branco sólido) */
+#entrar-google {
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--branco);
+  color: var(--preto);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+#entrar-google:hover {
+  background: var(--preto);
+  color: var(--branco);
+}
+
+/* ===== Tela principal ===== */
+#tela-principal {
+  justify-content: flex-start;
+  padding-top: 48px;
+}
+
+/* Botão gigante de chamar */
+#chamar {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: var(--branco);
+  color: var(--preto);
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  padding: 24px;
+  box-shadow: 0 0 0 8px var(--preto), 0 0 0 10px var(--cinza-borda),
+    0 0 40px rgba(255, 255, 255, 0.15);
+  animation: pulsar 2.5s ease-in-out infinite;
+}
+
+#chamar:hover {
+  box-shadow: 0 0 0 8px var(--preto), 0 0 0 10px var(--branco),
+    0 0 60px rgba(255, 255, 255, 0.3);
+}
+
+#chamar:active {
+  transform: scale(0.94);
+}
+
+@keyframes pulsar {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+/* Botão sair (discreto) */
+#sair {
+  background: transparent;
+  color: var(--cinza-texto);
+  border-color: var(--cinza-borda);
+  padding: 10px 24px;
+  font-size: 0.9rem;
+}
+
+#sair:hover {
+  color: var(--branco);
+  border-color: var(--branco);
+}
+
+/* ===== Mensagens ===== */
+#mensagem,
+#mensagem-login {
+  min-height: 1.5em;
+  font-size: 0.9rem;
+  color: var(--cinza-texto);
+  text-align: center;
+}
+
+/* ===== Lista ===== */
+#lista {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+#lista > * {
+  background: var(--grafite);
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  padding: 14px 16px;
+  animation: entrar 0.3s ease both;
+}
+
+#lista > *:first-child {
+  border-color: var(--branco);
+}
+
+/* ===== Telas maiores ===== */
+@media (min-width: 768px) {
+  .titulo {
+    font-size: 2.4rem;
+  }
 }
