@@ -1,12 +1,41 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head><meta charset="UTF-8"><title>Teste</title></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Botão da Resenha</title>
+</head>
 <body>
-  <script type="module">
-    import { supabase } from '../src/js/supabase.js';
+  <form id="form-login">
+    <input type="email" id="email" placeholder="Email" required>
+    <button type="submit">Enviar Link Mágico</button>
+  </form>
+  <p id="mensagem"></p>
 
-    const { data, error } = await supabase.from('resenhas').select('*');
-    console.log('dados:', data, 'erro:', error);
+  <script type="module">
+    import { enviarLinkMagico, quandoMudarLogin } from '../src/js/auth.js';
+
+    const form = document.getElementById('form-login');
+    const email = document.getElementById('email');
+    const mensagem = document.getElementById('mensagem');
+
+    form.addEventListener('submit', async (evento) => {
+      evento.preventDefault(); // impede o recarregamento da página
+      mensagem.textContent = 'Enviando...';
+
+      try {
+        await enviarLinkMagico(email.value.trim());
+        mensagem.textContent = 'Link enviado. Confira seu e-mail.';
+      } catch (erro) {
+        console.error(erro);
+        mensagem.textContent = 'Não foi possível enviar. Veja o console.';
+      }
+    });
+
+    // Roda quando o login muda: ao abrir a página, ao sair ou ao voltar do link
+    quandoMudarLogin((usuario) => {
+      console.log('usuario:', usuario);
+    });
   </script>
 </body>
 </html>
