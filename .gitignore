@@ -1,0 +1,33 @@
+# ===== Segredos: nunca subir para o GitHub =====
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+*.pem
+secrets/
+
+# ===== Supabase CLI (arquivos locais, não versionar) =====
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# ===== Dependências (se um dia usar npm) =====
+node_modules/
+
+# ===== Arquivos do sistema operacional =====
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ===== Editor =====
+.vscode/
+*.swp
+*.swo
+*~
+
+# ===== Logs e arquivos temporários =====
+*.log
+npm-debug.log*
+.cache/
+tmp/
