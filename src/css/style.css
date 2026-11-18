@@ -40,9 +40,9 @@ body {
 /* ===== Telas ===== */
 section {
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
   min-height: 100dvh;
-  padding: 32px 24px;
+  padding: 32px 20px 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -84,18 +84,20 @@ section {
   margin-bottom: 24px;
 }
 
-/* ===== Botões ===== */
+/* ===== Botões (base) ===== */
 button {
   font: inherit;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
   border: 2px solid var(--branco);
   border-radius: var(--raio);
   transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 button:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 button:focus-visible {
@@ -108,7 +110,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Botão principal (branco sólido) */
 #entrar-google {
   width: 100%;
   padding: 16px 24px;
@@ -127,9 +128,9 @@ button:disabled {
 #tela-principal {
   justify-content: flex-start;
   padding-top: 48px;
+  gap: 20px;
 }
 
-/* Botão gigante de chamar */
 #chamar {
   width: 220px;
   height: 220px;
@@ -165,7 +166,6 @@ button:disabled {
   }
 }
 
-/* Botão sair (discreto) */
 #sair {
   background: transparent;
   color: var(--cinza-texto);
@@ -188,30 +188,121 @@ button:disabled {
   text-align: center;
 }
 
-/* ===== Lista ===== */
+/* ===== Lista de resenhas ===== */
 #lista {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 14px;
+  margin-top: 16px;
 }
 
+/* Card de cada resenha */
 #lista > * {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   background: var(--grafite);
   border: 1px solid var(--cinza-borda);
-  border-radius: var(--raio);
-  padding: 14px 16px;
+  border-radius: 20px;
+  padding: 20px;
   animation: entrar 0.3s ease both;
 }
 
+/* Resenha mais recente em destaque */
 #lista > *:first-child {
   border-color: var(--branco);
 }
 
+/* Título do card */
+#lista h2,
+#lista h3,
+#lista h4,
+#lista strong {
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* Lista de respostas (quem aceitou, recusou...) */
+#lista ul,
+#lista ol {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--cinza-borda);
+}
+
+#lista li {
+  list-style: none;
+  padding: 10px 0;
+  font-size: 0.95rem;
+  color: #d6d6d6;
+  border-bottom: 1px solid var(--cinza-borda);
+}
+
+#lista li:last-child {
+  border-bottom: none;
+}
+
+/* Grupo de botões de resposta */
+#lista div:has(> button) {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Botões de resposta: grandes e fáceis de tocar */
+#lista button {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: transparent;
+  color: var(--branco);
+  border: 1.5px solid var(--cinza-borda);
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+#lista button:hover {
+  border-color: var(--branco);
+}
+
+/* Primeiro botão (Aceitar) como ação principal */
+#lista button:first-of-type {
+  background: var(--branco);
+  color: var(--preto);
+  border-color: var(--branco);
+  font-weight: 700;
+}
+
+#lista button:first-of-type:hover {
+  background: #e6e6e6;
+}
+
 /* ===== Telas maiores ===== */
 @media (min-width: 768px) {
+  section {
+    max-width: 520px;
+  }
+
   .titulo {
     font-size: 2.4rem;
+  }
+}
+
+/* ===== Acessibilidade ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
