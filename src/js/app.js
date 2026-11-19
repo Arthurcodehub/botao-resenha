@@ -32,6 +32,9 @@ const BOTOES_RESPOSTA = [
   { valor: 'outro_horario', rotulo: '🕒 Definir outro horário' },
 ];
 
+// Quem criou a resenha só pode sugerir outro horário (o banco também exige isso)
+const RESPOSTAS_DO_CRIADOR = ['outro_horario'];
+
 // Textos da lista: o que cada membro já fez
 const TEXTO_RESPOSTA = {
   aceito: '🍻 Aceitou',
@@ -59,7 +62,7 @@ botaoChamar.addEventListener('click', async () => {
     msg.textContent = 'Resenha chamada!';
   } catch (erro) {
     console.error(erro);
-    // O banco avisa quando o limite de 10 min foi atingido ("Aguarde X min...")
+    // O banco avisa quando o limite foi atingido ("Aguarde X min...")
     msg.textContent = erro?.message?.startsWith('Aguarde')
       ? erro.message
       : 'Não foi possível chamar a resenha.';
@@ -86,11 +89,15 @@ function formatarHora(dataIso) {
 }
 
 function desenharResenha(resenha) {
+  const ehCriador = Boolean(usuarioAtual) && resenha.criado_por === usuarioAtual.id;
+
   const card = document.createElement('div');
   card.className = 'card';
 
   const titulo = document.createElement('strong');
-  titulo.textContent = `${resenha.perfis?.nome ?? 'Alguém'} chamou a resenha`;
+  titulo.textContent = ehCriador
+    ? 'Você chamou a resenha'
+    : `${resenha.perfis?.nome ?? 'Alguém'} chamou a resenha`;
   card.append(titulo);
 
   if (resenha.expira_em) {
@@ -110,15 +117,20 @@ function desenharResenha(resenha) {
   }
   card.append(respostas);
 
-  for (const { valor, rotulo } of BOTOES_RESPOSTA) {
+  const botoes = ehCriador
+    ? BOTOES_RESPOSTA.filter(({ valor }) => RESPOSTAS_DO_CRIADOR.includes(valor))
+    : BOTOES_RESPOSTA;
+
+  for (const { valor, rotulo } of botoes) {
     const botao = document.createElement('button');
     botao.textContent = rotulo;
+    if (valor === 'aceito') botao.classList.add('principal');
     botao.addEventListener('click', () => responder(resenha.id, valor));
     card.append(botao);
   }
 
   // Só quem chamou a resenha pode apagá-la
-  if (usuarioAtual && resenha.criado_por === usuarioAtual.id) {
+  if (ehCriador) {
     const botaoApagar = document.createElement('button');
     botaoApagar.className = 'apagar';
     botaoApagar.textContent = '🗑️ Apagar resenha';
