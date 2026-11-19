@@ -1,10 +1,11 @@
 // src/js/resenhas.js
-// Criar resenhas, responder e listar. Quem decide o que pode é o RLS no banco.
+// Criar resenhas, responder, apagar e listar. Quem decide o que pode é o RLS no banco.
 
 import { supabase } from './supabase.js';
 import { usuarioAtual } from './auth.js';
 
-// Cria uma resenha em nome do usuário logado
+// Cria uma resenha em nome do usuário logado.
+// O banco recusa se o limite de 10 min foi atingido (erro "Aguarde X min...").
 export async function criarResenha() {
   const usuario = await usuarioAtual();
   if (!usuario) throw new Error('Você precisa estar logado.');
@@ -41,22 +42,25 @@ export async function responderResenha(resenhaId, resposta, horarioSugerido = nu
   if (error) throw error;
 }
 
-// Lista as resenhas recentes, com quem criou e as respostas de cada membro
+// Apaga uma resenha (e as respostas dela, por cascade).
+// O RLS só permite apagar as suas; se não for sua, nada é apagado e damos erro.
+export async function apagarResenha(resenhaId) {
+  const { data, error } = await supabase
+    .from('resenhas')
+    .delete()
+    .eq('id', resenhaId)
+    .select('id');
+
+  if (error) throw error;
+  if (!data?.length) throw new Error('Resenha não encontrada ou sem permissão.');
+}
+
+// Lista as resenhas ativas, com quem criou e as respostas de cada membro.
+// As expiradas não chegam aqui: o RLS já as esconde.
 export async function listarResenhas(limite = 20) {
   const { data, error } = await supabase
     .from('resenhas')
-    .select(`
-      id,
-      criada_em,
-      criado_por,
-      perfis!criado_por ( nome ),
-      respostas (
-        resposta,
-        horario_sugerido,
-        membro_id,
-        perfis ( nome )
-      )
-    `)
+    .select('id, criado_por, criada_em, expira_em, perfis(nome), respostas(resposta, horario_sugerido, perfis(nome))')
     .order('criada_em', { ascending: false })
     .limit(limite);
 

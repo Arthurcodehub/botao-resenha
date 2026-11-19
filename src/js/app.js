@@ -2,7 +2,12 @@
 // Liga as telas aos eventos. Os dados vêm de resenhas.js e o login de auth.js.
 
 import { entrarComGoogle, sair, quandoMudarLogin } from './auth.js';
-import { criarResenha, responderResenha, listarResenhas } from './resenhas.js';
+import {
+  criarResenha,
+  responderResenha,
+  listarResenhas,
+  apagarResenha,
+} from './resenhas.js';
 import { ouvirMudancas, pararDeOuvir } from './realtime.js';
 
 const telaLogin = document.getElementById('tela-login');
@@ -13,6 +18,12 @@ const msg = document.getElementById('mensagem');
 const lista = document.getElementById('lista');
 const botaoChamar = document.getElementById('chamar');
 const botaoSair = document.getElementById('sair');
+
+// De quanto em quanto tempo a lista se atualiza sozinha (some as expiradas)
+const INTERVALO_ATUALIZACAO = 60_000;
+
+let usuarioAtual = null;
+let temporizador = null;
 
 // Textos dos botões: a ação que o membro vai escolher
 const BOTOES_RESPOSTA = [
@@ -42,12 +53,16 @@ botaoSair.addEventListener('click', () => sair());
 
 botaoChamar.addEventListener('click', async () => {
   botaoChamar.disabled = true;
+  msg.textContent = '';
   try {
     await criarResenha();
     msg.textContent = 'Resenha chamada!';
   } catch (erro) {
     console.error(erro);
-    msg.textContent = 'Não foi possível chamar a resenha.';
+    // O banco avisa quando o limite de 10 min foi atingido ("Aguarde X min...")
+    msg.textContent = erro?.message?.startsWith('Aguarde')
+      ? erro.message
+      : 'Não foi possível chamar a resenha.';
   } finally {
     botaoChamar.disabled = false;
   }
@@ -63,6 +78,13 @@ async function atualizarLista() {
   }
 }
 
+function formatarHora(dataIso) {
+  return new Date(dataIso).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 function desenharResenha(resenha) {
   const card = document.createElement('div');
   card.className = 'card';
@@ -70,6 +92,13 @@ function desenharResenha(resenha) {
   const titulo = document.createElement('strong');
   titulo.textContent = `${resenha.perfis?.nome ?? 'Alguém'} chamou a resenha`;
   card.append(titulo);
+
+  if (resenha.expira_em) {
+    const validade = document.createElement('small');
+    validade.className = 'validade';
+    validade.textContent = `Some às ${formatarHora(resenha.expira_em)}`;
+    card.append(validade);
+  }
 
   const respostas = document.createElement('ul');
   for (const r of resenha.respostas) {
@@ -86,6 +115,15 @@ function desenharResenha(resenha) {
     botao.textContent = rotulo;
     botao.addEventListener('click', () => responder(resenha.id, valor));
     card.append(botao);
+  }
+
+  // Só quem chamou a resenha pode apagá-la
+  if (usuarioAtual && resenha.criado_por === usuarioAtual.id) {
+    const botaoApagar = document.createElement('button');
+    botaoApagar.className = 'apagar';
+    botaoApagar.textContent = '🗑️ Apagar resenha';
+    botaoApagar.addEventListener('click', () => apagar(resenha.id));
+    card.append(botaoApagar);
   }
 
   return card;
@@ -105,16 +143,47 @@ async function responder(resenhaId, valor) {
   }
 }
 
+async function apagar(resenhaId) {
+  if (!confirm('Apagar esta resenha? As respostas também serão apagadas.')) return;
+  try {
+    await apagarResenha(resenhaId);
+    msg.textContent = 'Resenha apagada.';
+    await atualizarLista();
+  } catch (erro) {
+    console.error(erro);
+    msg.textContent = 'Não foi possível apagar a resenha.';
+  }
+}
+
+function iniciarTemporizador() {
+  pararTemporizador();
+  temporizador = setInterval(atualizarLista, INTERVALO_ATUALIZACAO);
+}
+
+function pararTemporizador() {
+  if (temporizador) clearInterval(temporizador);
+  temporizador = null;
+}
+
+// Ao voltar para o app (celular), atualiza para tirar o que já expirou
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && usuarioAtual) atualizarLista();
+});
+
 // Mostra a tela certa e liga ou desliga a escuta ao vivo conforme o login
 quandoMudarLogin(async (usuario) => {
+  usuarioAtual = usuario ?? null;
+
   if (usuario) {
     telaLogin.classList.add('hidden');
     telaPrincipal.classList.remove('hidden');
     await atualizarLista();
     // Qualquer mudança no banco refaz a lista, sem precisar do payload
     ouvirMudancas(atualizarLista);
+    iniciarTemporizador();
   } else {
     pararDeOuvir();
+    pararTemporizador();
     telaPrincipal.classList.add('hidden');
     telaLogin.classList.remove('hidden');
   }
