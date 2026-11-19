@@ -16,11 +16,46 @@
     <p id="mensagem-login"></p>
   </section>
 
+  <section id="tela-grupos" class="hidden">
+    <h1 class="titulo">Seus grupos</h1>
+    <div id="meus-grupos"></div>
+
+    <div class="bloco">
+      <h2 class="subtitulo">Criar grupo</h2>
+      <input id="nome-grupo" type="text" maxlength="40" placeholder="Resenha da firma" autocomplete="off">
+      <button id="criar-grupo">Criar grupo</button>
+    </div>
+
+    <div class="bloco">
+      <h2 class="subtitulo">Entrar com código</h2>
+      <input id="codigo-grupo" type="text" maxlength="8" placeholder="ABC234" autocomplete="off" autocapitalize="characters">
+      <button id="entrar-grupo">Entrar no grupo</button>
+    </div>
+
+    <p id="mensagem-grupos"></p>
+    <button id="sair-grupos">Sair da conta</button>
+  </section>
+
   <section id="tela-principal" class="hidden">
+    <div class="topo">
+      <button id="trocar-grupo">‹ Seus grupos</button>
+      <h1 id="nome-do-grupo"></h1>
+    </div>
+
     <button id="chamar">CHAMAR RESENHA</button>
-    <button id="sair">Sair</button>
     <p id="mensagem"></p>
     <div id="lista"></div>
+
+    <details id="opcoes-grupo">
+      <summary>Opções do grupo</summary>
+      <p>Código de convite: <strong id="codigo-do-grupo"></strong></p>
+      <button id="convidar">Convidar amigos</button>
+      <button id="novo-codigo" class="hidden">Gerar novo código</button>
+      <button id="sair-do-grupo">Sair do grupo</button>
+      <button id="apagar-grupo" class="hidden">Apagar grupo</button>
+    </details>
+
+    <button id="sair">Sair da conta</button>
   </section>
 
   <script type="module" src="../src/js/app.js"></script>

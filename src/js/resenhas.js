@@ -4,15 +4,15 @@
 import { supabase } from './supabase.js';
 import { usuarioAtual } from './auth.js';
 
-// Cria uma resenha em nome do usuário logado.
-// O banco recusa se o limite de 10 min foi atingido (erro "Aguarde X min...").
-export async function criarResenha() {
+// Cria uma resenha em nome do usuário logado, dentro de um grupo dele.
+// O banco recusa se o limite (3 a cada 30 min) foi atingido.
+export async function criarResenha(grupoId) {
   const usuario = await usuarioAtual();
   if (!usuario) throw new Error('Você precisa estar logado.');
 
   const { data, error } = await supabase
     .from('resenhas')
-    .insert({ criado_por: usuario.id })
+    .insert({ criado_por: usuario.id, grupo_id: grupoId })
     .select()
     .single();
 
@@ -55,15 +55,16 @@ export async function apagarResenha(resenhaId) {
   if (!data?.length) throw new Error('Resenha não encontrada ou sem permissão.');
 }
 
-// Lista as resenhas ativas, com quem criou e as respostas de cada membro.
+// Lista as resenhas ativas de um grupo, com quem criou e as respostas de cada membro.
 // As expiradas não chegam aqui: o RLS já as esconde.
 // perfis!criado_por diz qual relacionamento usar (resenhas também chega em perfis via respostas).
-export async function listarResenhas(limite = 20) {
+export async function listarResenhas(grupoId, limite = 20) {
   const { data, error } = await supabase
     .from('resenhas')
     .select(
       'id, criada_em, expira_em, criado_por, perfis!criado_por(nome), respostas(resposta, horario_sugerido, membro_id, perfis(nome))'
     )
+    .eq('grupo_id', grupoId)
     .order('criada_em', { ascending: false })
     .limit(limite);
 
