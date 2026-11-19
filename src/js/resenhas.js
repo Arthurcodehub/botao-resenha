@@ -57,10 +57,13 @@ export async function apagarResenha(resenhaId) {
 
 // Lista as resenhas ativas, com quem criou e as respostas de cada membro.
 // As expiradas não chegam aqui: o RLS já as esconde.
+// perfis!criado_por diz qual relacionamento usar (resenhas também chega em perfis via respostas).
 export async function listarResenhas(limite = 20) {
   const { data, error } = await supabase
     .from('resenhas')
-    .select('id, criado_por, criada_em, expira_em, perfis(nome), respostas(resposta, horario_sugerido, perfis(nome))')
+    .select(
+      'id, criada_em, expira_em, criado_por, perfis!criado_por(nome), respostas(resposta, horario_sugerido, membro_id, perfis(nome))'
+    )
     .order('criada_em', { ascending: false })
     .limit(limite);
 
