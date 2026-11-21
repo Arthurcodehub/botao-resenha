@@ -1,6 +1,6 @@
 // src/js/app.js
 // Liga as telas aos eventos. Os dados vêm de resenhas.js e grupos.js; o login, de auth.js.
-
+import { ativarPush, suportaPush } from './push.js';
 import { entrarComGoogle, sair, quandoMudarLogin } from './auth.js';
 import {
   criarResenha,
@@ -503,4 +503,27 @@ quandoMudarLogin(async (usuario) => {
   }
 
   if (mudouDeUsuario) await iniciarSessao();
+});
+
+const botaoNotificacoes = document.getElementById('notificacoes');
+const debugPush = document.getElementById('debug-push');
+
+if (!suportaPush()) botaoNotificacoes.classList.add('hidden');
+
+botaoNotificacoes.addEventListener('click', async () => {
+  botaoNotificacoes.disabled = true;
+  debugPush.textContent = '';
+  try {
+    const inscricao = await ativarPush();
+    // Mostra só o início do endpoint, para conferir sem expor a inscrição inteira
+    debugPush.textContent =
+      'Inscrição criada.\n' +
+      'Endpoint (início): ' + inscricao.endpoint.slice(0, 60) + '...';
+    console.log('PushSubscription:', inscricao.toJSON());
+  } catch (erro) {
+    console.error(erro);
+    debugPush.textContent = erro.message;
+  } finally {
+    botaoNotificacoes.disabled = false;
+  }
 });
